@@ -1,0 +1,16 @@
+{
+  "name": "betfair",
+  "version": "1.0.0",
+  "description": "Betfair Integration Application",
+  "main": "ca_app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phil Rowley",
+  "license": "ISC",
+  "dependencies": {
+    "asynch": "^0.5.2",
+    "moment": "^2.14.1",
+    "node-yaml-config": "0.0.4"
+  }
+}
