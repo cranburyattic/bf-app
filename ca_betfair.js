@@ -17,8 +17,8 @@ var sso_port=config.betfair.sso.port;
 var exchange_host=config.betfair.exchange.host;
 var exchange_port=config.betfair.exchange.port;
 var APP_KEY = config.betfair.app_key;
-var KEY=config.betfair.app_dir + '/' + config.betfair.key_file;
-var CERT=config.betfair.app_dir + '/' + config.betfair.cert_file;
+var KEY=config.betfair.app_dir + '/config/' + config.betfair.key_file;
+var CERT=config.betfair.app_dir + '/config/' + config.betfair.cert_file;
 var sessionToken;
 
 
@@ -157,7 +157,7 @@ exports.getTodaysRaces = function(callback) {
 
 exports.getRacingMarketsForEvents = function(eventIds, callback) {
 
-  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventIds":[' + eventIds + '],"marketTypeCodes":["WIN"]},"sort":"FIRST_TO_START","maxResults":"1000","marketProjection":["MARKET_START_TIME","EVENT","COMPETITION"]}, "id": 1}]';
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventIds":[' + eventIds + '],"marketTypeCodes":["WIN"]},"sort":"FIRST_TO_START","maxResults":"1000","marketProjection":["MARKET_START_TIME","EVENT","COMPETITION","RUNNER_METADATA"]}, "id": 1}]';
 
   executeBetfair(postdata,callback);
 }
@@ -185,12 +185,14 @@ exports.getUnderOver25 = function(callback) {
 
 function getStartDate() {
   var d = new Date();
+  d.setDate(20);
   d.setHours(1,0,0,0)
   return d.toISOString();
 }
 
 function getEndDate() {
   var d = new Date();
+  d.setDate(20);
   d.setHours(23,0,0,0);
   return d.toISOString();
 }

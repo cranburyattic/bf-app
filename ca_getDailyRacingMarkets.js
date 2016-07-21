@@ -20,11 +20,12 @@ process.on('SIGINT', function() {
 });
 
 function quit() {
-  console.error('Finished!!');
+  console.log('Finished ' + new Date());
   process.exit(0);
 }
 
 function runApplication() {
+  console.log('Running ' + new Date());
   betfair.login(getTodaysRaces);
 }
 
@@ -36,15 +37,11 @@ function logout() {
 function dumpToFile(dir, filename, data) {
 
   var rootDir = config.betfair.data_dir + '/' + dir;
-  console.log(rootDir);
 
 	if(!fs.existsSync(rootDir)) {
    		fs.mkdirSync(rootDir);
-	} else {
-    	//console.error('Directory Exists');
 	}
-
-	fs.appendFileSync(rootDir + "/" +  filename, data + "\n")
+	fs.appendFileSync(rootDir + '/' +  filename, data + '\n')
 
 }
 
@@ -59,28 +56,32 @@ function getEventId(item) {
 }
 
 function getRacingMarketsForEvents(data) {
+  writeJSON('markets.json', data)
   var mapped = data[0].result.map(getEventId);
   var ids = '"' + mapped.join('","') + '"';
   betfair.getRacingMarketsForEvents(ids,log)  ;
 }
 
 function log(data) {
-  // log the column headers
-  writeToFile('course|marketName|marketId|marketStartTime|distance');
-  data[0].result.forEach(outputPSVData);
+  writeJSON('events.json', data)
+  writeToFile('course,marketName,marketId,marketStartTime,distance,runners');
+  data[0].result.forEach(outputCSVData);
   // logout
   logout();
 }
 
 function writeToFile(data) {
-  console.log(data);
   dumpToFile('data/' + generateDirectoryName(),'markets.csv',data);
 }
 
-function outputPSVData(item) {
+function writeJSON(filename,data) {
+  dumpToFile('data/' + generateDirectoryName(),filename,JSON.stringify(data));
+}
+
+function outputCSVData(item) {
     var marketStartTime = moment(new Date(item.marketStartTime));
     //var marketStartTimeMinus10 = moment(new Date(item.marketStartTime)).subtract(10,'m');
-    var s = item.event.venue + "|" + item.marketName + "|" + item.marketId + "|" + marketStartTime.format() + "|" + calculateRaceLength(item.marketName);
+    var s = item.event.venue + "," + item.marketName + "," + item.marketId + "," + marketStartTime.format() + "," + calculateRaceLength(item.marketName) + "," + item.runners.length;
     writeToFile(s);
 }
 
