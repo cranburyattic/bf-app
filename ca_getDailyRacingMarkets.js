@@ -62,12 +62,33 @@ function getRacingMarketsForEvents(data) {
   betfair.getRacingMarketsForEvents(ids,log)  ;
 }
 
+var newVals = {};
+
 function log(data) {
   writeJSON('events.json', data)
   writeToFile('course,marketName,marketId,marketStartTime,distance,runners');
   data[0].result.forEach(outputCSVData);
   // logout
+  var map;
+  newVals = data[0].result.map(function(item){
+    return calculateRaceLength(item.marketName) + "," + item.runners.length;
+  }).reduce(function(countMap, word) {
+    countMap[word] = ++countMap[word] || 1
+    // increment or initialize to 1
+    return countMap
+  },{});
+
+
+  var a = Object.keys(newVals);
+  a.forEach(outputScatterData);
+  //console.log(Object.keys(newVals));
+  //newVals.forEach(outputScatterData);
+
   logout();
+}
+
+function outputScatterData(item) {
+  dumpToFile('data/' + generateDirectoryName(),'scatter.csv',item + "," + newVals[item]);
 }
 
 function writeToFile(data) {

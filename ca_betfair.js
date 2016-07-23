@@ -150,7 +150,7 @@ function executeBetfair(postdata, callback) {
 
 exports.getTodaysRaces = function(callback) {
 
-  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listEvents", "params": {"filter":{"eventTypeIds":["7"],"bspOnly":true,"marketCountries":["GB","IRE"],"marketStartTime":{"from":"'+ getStartDate() + '","to":"'+ getEndDate() + '"}}}, "id": 1}]';
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listEvents", "params": {"filter":{"eventTypeIds":["7"],"bspOnly":true,"marketCountries":["GB","IE"],"marketStartTime":{"from":"'+ getStartDate() + '","to":"'+ getEndDate() + '"}}}, "id": 1}]';
 
   executeBetfair(postdata,callback);
 }
