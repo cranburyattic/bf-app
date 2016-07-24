@@ -171,21 +171,21 @@ exports.getMarketCatalog = function(marketId, callback) {
 
 exports.getMarketBook = function(marketId, callback) {
 
-  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketBook", "params": {"marketIds":["' + marketId + '"],"priceProjection":{"priceData":["SP_AVAILABLE","SP_TRADED","EX_BEST_OFFERS","EX_ALL_OFFERS","EX_TRADED"]}}, "id": 1}]';
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketBook", "params": {"marketIds":["' + marketId + '"],"priceProjection":{"priceData":["EX_ALL_OFFERS","EX_TRADED"]}}, "id": 1}]';
 
   executeBetfair(postdata,callback);
 }
 
 exports.getUnderOver25 = function(callback) {
 
-  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"marketCountries":["GB"],"marketTypeCodes":["OVER_UNDER_25"],"marketStartTime":{"from":"' + getStartDate() + '","to":"' + getEndDate() + '"}},"maxResults":"500","marketProjection":["MARKET_START_TIME"]}, "id": 1}]';
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"marketCountries":["GB"],"marketTypeCodes":["OVER_UNDER_25"],"marketStartTime":{"from":"' + getStartDate() + '","to":"' + getEndDate() + '"}},"maxResults":"500","marketProjection":["MARKET_START_TIME","EVENT"]}, "id": 1}]';
 
   executeBetfair(postdata,callback);
 }
 
 function getStartDate() {
   var d = new Date();
-  d.setHours(1,0,0,0)
+  d.setHours(1,0,0,0);
   return d.toISOString();
 }
 

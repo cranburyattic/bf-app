@@ -19,6 +19,7 @@ template = env.get_template('report.html')
 
 markets = pd.read_csv(data_dir + '/data/' + todays_date+ '/markets.csv',dtype={'marketId':str})
 scatter = pd.read_csv(data_dir + '/data/' + todays_date+ '/scatter.csv', header=None)
+under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.csv', header=None)
 
 distance_and_runners_df = markets[['distance','runners']]
 
@@ -26,6 +27,7 @@ distance_and_runners = distance_and_runners_df.plot(kind='bar')
 
 template_vars = {'title' : 'Market Report - ' + strftime('%Y-%m-%d %H:%M:%S', localtime()),
                  'race_list': markets.to_html(),
+                 'under_over_25': under_over_25.to_html(),
                  'summary': markets.describe().to_html()}
 
 html_out = template.render(template_vars)
