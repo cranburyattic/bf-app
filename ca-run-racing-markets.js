@@ -9,8 +9,8 @@ var moment = require('moment');
 var marketTimers = new Map();
 var marketStartTimes = new Map();
 
-var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/markets.csv');
-//var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + '2016-7-23' + '/markets.csv');
+//var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/markets.csv');
+var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + '2016-8-7' + '/markets.csv');
 
 function runApplication() {
   console.log('Running ' + new Date());
@@ -51,9 +51,11 @@ function processMarket(market) {
 
 function handleData(data)   {
   var marketId = data[0].result[0].marketId;
-  utils.writeToFileJson('book-' + marketId + '.txt',data);
+  //utils.writeToFileJson('book-' + marketId + '.txt',data);
   var status = data[0].result[0].status;
   if(moment().isAfter(marketStartTimes.get(marketId))) {
+    var message = marketId + ',' + data[0].result[0].totalMatched;
+    utils.writeToFileAddDay('matched.csv',message)
     console.log('Closed ' + marketId)
     clearTimeout(marketTimers.get(marketId));
     marketTimers.delete(marketId);
@@ -72,7 +74,7 @@ function generateDirectoryName() {
 function setMarketTimeout(marketStartTime,market) {
   console.log('Register ' +  market);
   var now = moment();
-  var startTime = moment(marketStartTime).subtract(10,'minutes');
+  var startTime = moment(marketStartTime).subtract(6,'minutes');
   var length = startTime.diff(moment());
   setTimeout(function(){ setMarketInterval(market) },1000);
 }

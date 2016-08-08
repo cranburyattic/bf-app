@@ -16,11 +16,24 @@ exports.writeToFile = function(filename,data) {
     dumpToFile('data/' + generateDirectoryName(),filename,data);
 }
 
+exports.writeToFileAddDay = function(filename,data) {
+    dumpToFile('data/' + generateDirectoryNameAddOne(),filename,data);
+}
+
+
 exports.writeToFileJson = function(filename,data) {
     dumpToFile('data/' + generateDirectoryName(),filename,JSON.stringify(data));
 }
 
+
+
 function generateDirectoryName() {
   var date = new Date();
-  return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
+  return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + 25; //date.getDate();
+}
+
+function generateDirectoryNameAddOne() {
+  var now = moment();
+  var tomorrow = moment.duration(1, 'd');
+  return tomorrow.year() + '-' + (tomorrow.month() + 1)  + '-' + (tomorrow.day()); //date.getDate();
 }

@@ -6,7 +6,6 @@ var https = require('https');
 var fs = require('fs');
 
 var yaml_config = require('node-yaml-config');
-console.log(__dirname);
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
 
 
@@ -185,12 +184,14 @@ exports.getUnderOver25 = function(callback) {
 
 function getStartDate() {
   var d = new Date();
+  d.setDate(8);
   d.setHours(1,0,0,0);
   return d.toISOString();
 }
 
 function getEndDate() {
   var d = new Date();
+  d.setDate(8);
   d.setHours(23,0,0,0);
   return d.toISOString();
 }
