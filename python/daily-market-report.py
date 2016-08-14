@@ -25,14 +25,17 @@ under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.c
 distance_and_runners_df = markets[['distance','runners']]
 distance_and_runners = distance_and_runners_df.plot(kind='bar')
 
-matched_df = matched[['marketId','totalMatched']]
-matched_time_and_value = matched_df.plot(x='marketId',kind='bar')
+matched_df = matched[['course','totalMatched']]
+matched_time_and_value = matched_df.plot(x='course',kind='bar')
+
+df_matched_pivot = pd.pivot_table(matched,index=["course"],values=["totalMatched"],aggfunc=np.sum)
 
 template_vars = {'title' : 'Market Report - ' + strftime('%Y-%m-%d %H:%M:%S', localtime()),
                  'race_list': markets.to_html(),
                  'under_over_25': under_over_25.to_html(),
                  'summary': markets.describe().to_html(),
-                 'matched_bets' : matched.to_html()}
+                 'matched_bets' : matched.to_html(),
+                 'matched_bets_total' : df_matched_pivot.to_html()}
 
 html_out = template.render(template_vars)
 
