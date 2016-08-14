@@ -8,9 +8,10 @@ var moment = require('moment');
 
 var marketTimers = new Map();
 var marketStartTimes = new Map();
+var marketData = new Map();
 
-//var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/markets.csv');
-var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + '2016-8-7' + '/markets.csv');
+var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/markets.csv');
+//var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + '2016-8-7' + '/markets.csv');
 
 function runApplication() {
   console.log('Running ' + new Date());
@@ -33,10 +34,13 @@ function quit() {
 }
 
 function setUpTimeouts() {
+utils.writeToFileAddDay('matched.csv','course,marketName,marketId,startTime,totalMatched');
 var csvStream = csv
     .parse({headers : true})
     .on("data", function(data) {
         marketStartTimes.set(data.marketId,moment(data.marketStartTime));
+        var marketInfo = data.course  + ',' + data.marketName;
+        marketData.set(data.marketId,marketInfo);
         setMarketTimeout(data.marketStartTime, data.marketId);
     })
     .on("end", function(){
@@ -50,16 +54,17 @@ function processMarket(market) {
 }
 
 function handleData(data)   {
+//console.log(data);
   var marketId = data[0].result[0].marketId;
   //utils.writeToFileJson('book-' + marketId + '.txt',data);
   var status = data[0].result[0].status;
   if(moment().isAfter(marketStartTimes.get(marketId))) {
-    var message = marketId + ',' + data[0].result[0].totalMatched;
+    var message = marketData.get(marketId) + ',' + marketId + ',' + moment(marketStartTimes.get(marketId)).format() + ',' + data[0].result[0].totalMatched;
     utils.writeToFileAddDay('matched.csv',message)
     console.log('Closed ' + marketId)
     clearTimeout(marketTimers.get(marketId));
-    marketTimers.delete(marketId);
-    if(marketTimers.size == 0) {
+    marketStartTimes.delete(marketId);
+    if(marketStartTimes.size == 0) {
         console.log('No markets left - Logging off');
         logout();
     }
@@ -76,7 +81,7 @@ function setMarketTimeout(marketStartTime,market) {
   var now = moment();
   var startTime = moment(marketStartTime).subtract(6,'minutes');
   var length = startTime.diff(moment());
-  setTimeout(function(){ setMarketInterval(market) },1000);
+  setTimeout(function(){ setMarketInterval(market) },length);
 }
 
 function setMarketInterval(market) {

@@ -19,20 +19,25 @@ template = env.get_template('report.html')
 
 markets = pd.read_csv(data_dir + '/data/' + todays_date+ '/markets.csv',dtype={'marketId':str})
 scatter = pd.read_csv(data_dir + '/data/' + todays_date+ '/scatter.csv', header=None)
-under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.csv', header=None)
+matched = pd.read_csv(data_dir + '/data/' + todays_date+ '/matched.csv', dtype={'marketId':str})
+under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.csv')
 
 distance_and_runners_df = markets[['distance','runners']]
-
 distance_and_runners = distance_and_runners_df.plot(kind='bar')
+
+matched_df = matched[['marketId','totalMatched']]
+matched_time_and_value = matched_df.plot(x='marketId',kind='bar')
 
 template_vars = {'title' : 'Market Report - ' + strftime('%Y-%m-%d %H:%M:%S', localtime()),
                  'race_list': markets.to_html(),
                  'under_over_25': under_over_25.to_html(),
-                 'summary': markets.describe().to_html()}
+                 'summary': markets.describe().to_html(),
+                 'matched_bets' : matched.to_html()}
 
 html_out = template.render(template_vars)
 
 distance_and_runners.get_figure().savefig('/tmp/distance-and-runners.png')
+matched_time_and_value.get_figure().savefig('/tmp/matched-bets.png')
 
 fig, ax = plt.subplots()
 

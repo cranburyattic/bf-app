@@ -1,6 +1,7 @@
 var fs = require('fs');
 var yaml_config = require('node-yaml-config');
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
+var moment = require('moment');
 
 function dumpToFile(dir, filename, data) {
 
@@ -29,11 +30,11 @@ exports.writeToFileJson = function(filename,data) {
 
 function generateDirectoryName() {
   var date = new Date();
-  return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + 25; //date.getDate();
+  return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
 }
 
 function generateDirectoryNameAddOne() {
   var now = moment();
-  var tomorrow = moment.duration(1, 'd');
-  return tomorrow.year() + '-' + (tomorrow.month() + 1)  + '-' + (tomorrow.day()); //date.getDate();
+  var tomorrow = now.add(1, 'd');
+  return tomorrow.year() + '-' + (tomorrow.month() + 1)  + '-' + (tomorrow.date()); //date.getDate();
 }
