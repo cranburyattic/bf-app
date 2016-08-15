@@ -1,5 +1,5 @@
 var fs = require('fs');
-var betfair = require('./ca_betfair.js');
+var betfair = require('./ca-betfair.js');
 var utils = require('./ca-utils.js');
 var csv = require('fast-csv')
 var yaml_config = require('node-yaml-config');

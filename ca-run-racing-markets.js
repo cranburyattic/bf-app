@@ -1,5 +1,5 @@
 var fs = require('fs');
-var betfair = require('./ca_betfair.js');
+var betfair = require('./ca-betfair.js');
 var utils = require('./ca-utils.js');
 var csv = require('fast-csv')
 var yaml_config = require('node-yaml-config');
@@ -34,12 +34,12 @@ function quit() {
 }
 
 function setUpTimeouts() {
-utils.writeToFileAddDay('matched.csv','course,marketName,marketId,startTime,totalMatched');
+utils.writeToFileAddDay('matched.csv','course,marketName,distance,marketId,startTime,totalMatched');
 var csvStream = csv
     .parse({headers : true})
     .on("data", function(data) {
         marketStartTimes.set(data.marketId,moment(data.marketStartTime));
-        var marketInfo = data.course  + ',' + data.marketName;
+        var marketInfo = data.course  + ',' + data.marketName + ',' + data.distance;
         marketData.set(data.marketId,marketInfo);
         setMarketTimeout(data.marketStartTime, data.marketId);
     })

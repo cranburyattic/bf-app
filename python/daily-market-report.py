@@ -22,11 +22,16 @@ scatter = pd.read_csv(data_dir + '/data/' + todays_date+ '/scatter.csv', header=
 matched = pd.read_csv(data_dir + '/data/' + todays_date+ '/matched.csv', dtype={'marketId':str})
 under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.csv')
 
-distance_and_runners_df = markets[['distance','runners']]
-distance_and_runners = distance_and_runners_df.plot(kind='bar')
+
+matched_dist_df = matched[['distance','totalMatched']]
+matched_dist = matched_dist_df.plot(x='distance',kind='bar')
 
 matched_df = matched[['course','totalMatched']]
 matched_time_and_value = matched_df.plot(x='course',kind='bar')
+
+distance_and_runners_df = markets[['distance','runners']]
+distance_and_runners = distance_and_runners_df.plot(kind='bar')
+
 
 df_matched_pivot = pd.pivot_table(matched,index=["course"],values=["totalMatched"],aggfunc=np.sum)
 
@@ -41,6 +46,7 @@ html_out = template.render(template_vars)
 
 distance_and_runners.get_figure().savefig('/tmp/distance-and-runners.png')
 matched_time_and_value.get_figure().savefig('/tmp/matched-bets.png')
+matched_dist.get_figure().savefig('/tmp/matched-dist-bets.png')
 
 fig, ax = plt.subplots()
 
