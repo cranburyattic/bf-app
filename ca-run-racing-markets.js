@@ -34,12 +34,12 @@ function quit() {
 }
 
 function setUpTimeouts() {
-utils.writeToFileAddDay('matched.csv','course,marketName,distance,marketId,startTime,totalMatched');
+utils.writeToFileAddDay('matched.csv','course,marketName,distance,runners,marketId,startTime,totalMatched');
 var csvStream = csv
     .parse({headers : true})
     .on("data", function(data) {
         marketStartTimes.set(data.marketId,moment(data.marketStartTime));
-        var marketInfo = data.course  + ',' + data.marketName + ',' + data.distance;
+        var marketInfo = data.course  + ',' + data.marketName + ',' + data.distance + ',' + data.runners;
         marketData.set(data.marketId,marketInfo);
         setMarketTimeout(data.marketStartTime, data.marketId);
     })
