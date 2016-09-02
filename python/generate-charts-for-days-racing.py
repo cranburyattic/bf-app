@@ -9,6 +9,7 @@ import os
 from datetime import datetime as dt
 from matplotlib.dates import date2num
 from matplotlib.colors import colorConverter
+from time import gmtime, strftime, localtime
 path = '';
 
 with open('../config/betfair_config.yml', 'r') as f:
@@ -30,15 +31,13 @@ for file in files:
     file_info = data_dir + '/data/' + todays_date + '/info-' + file + '.csv'
     markets = pd.read_csv(file_bets)
     prices = pd.read_csv(file_markets,header=None)
-    fig, ax = plt.subplots()
 
+    fig, ax = plt.subplots()
     info = open(file_info, 'r')
     ax.set_title(info.readline(),fontsize=14)
     info.close();
     ax.set_xlabel('TIME',fontsize=12)
     ax.set_ylabel('PRICE',fontsize=12)
-
-    gca = plt.gca()
 
     ax2 = ax.twinx()
 
@@ -51,3 +50,4 @@ for file in files:
     ax2.scatter(markets['matchedDateSeconds'], markets['lay'], s=50, c='y', alpha=0.5 )
 
     fig.savefig(data_dir + '/data/' + todays_date + '/chart-' + file + '.png', dpi=100)
+    plt.close()

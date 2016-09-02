@@ -16,7 +16,7 @@ function dumpToFile(dir, filename, data) {
     fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
 }
 
-function generateDirectoryName() {
+exports.generateDirectoryName = function() {
     var date = new Date();
     return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
 }
@@ -27,13 +27,13 @@ function generateDirectoryNameAddOne() {
 }
 
 exports.writeToFile = function (filename, data) {
-    dumpToFile('data/' + generateDirectoryName(), filename, data);
+    dumpToFile('data/' + this.generateDirectoryName(), filename, data);
 }
 
 exports.writeToFileAddDay = function (filename, data) {
-    dumpToFile('data/' + generateDirectoryNameAddOne(), filename, data);
+    dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data);
 }
 
 exports.writeToFileJson = function (filename, data) {
-    dumpToFile('data/' + generateDirectoryName(), filename, JSON.stringify(data));
+    dumpToFile('data/' + this.generateDirectoryName(), filename, JSON.stringify(data));
 }

@@ -35,11 +35,11 @@ function logout() {
     betfair.logout(quit);
 }
 
-var root = config.betfair.data_dir + '/data/2016-9-1/';
+var root = config.betfair.data_dir + '/data/' + utils.generateDirectoryName() + '/';
 // GET TODAY'S races
 function getTodaysBets() {
 
-  var content = fs.readFileSync(config.betfair.data_dir + '/data/2016-9-1/events.json');
+  var content = fs.readFileSync(root + 'events.json');
   var data = JSON.parse(content);
   var marketDetails = JSON.stringify(data[0].result[0])
 
@@ -47,22 +47,12 @@ function getTodaysBets() {
     item.runners.forEach(runner => {
       var message = item.event.venue + ' - ' + item.marketStartTime.substring(11,16) + ' - ' + runner.runnerName;
       //console.log(message);
-      dumpToFile('data/2016-9-1','info-' + item.marketId + '-' + runner.selectionId + '.csv',message);
+      utils.writeToFile('info-' + item.marketId + '-' + runner.selectionId + '.csv',message);
     });
   });
 
   //console.log('marketId,selectionId,placedDate,placedDateSeconds,matchDate,matchedDateSeconds,backPriceRequested,layPriceRequested,priceMatched,back,lay,profit,type');
 	betfair.getDailyBets(handleResult);
-}
-
-function dumpToFile(dir, filename, data) {
-
-    var rootDir = config.betfair.data_dir + '/' + dir;
-
-    if (!fs.existsSync(rootDir)) {
-        fs.mkdirSync(rootDir);
-    }
-    fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
 }
 
 function handleResult(data) {
@@ -74,7 +64,7 @@ function handleResult(data) {
     //console.log(bet.lastMatchedDate + " " + matchedDateSeconds);
     var lay = '';
     var back = '';
-    var backPriceRequest = '';
+    var backPriceRequested = '';
     var layPriceRequested = '';
     if(bet.side === 'LAY') {
       lay = bet.sizeSettled;
@@ -89,7 +79,7 @@ function handleResult(data) {
     //console.log(processed);
     //console.log(processed.indexOf(key));
     if(processed.indexOf(key) == -1 ) {
-      dumpToFile('data/2016-9-1','bets-' + bet.marketId + '-' + bet.selectionId + '.csv', header);
+      utils.writeToFile('bets-' + bet.marketId + '-' + bet.selectionId + '.csv', header);
       readBookTxt(bet.marketId);
       processed.push(key);
     }
@@ -97,9 +87,9 @@ function handleResult(data) {
     var message = bet.marketId + ',' + bet.selectionId + ',' +  bet.placedDate + ',' + placedDateSeconds + ',' +
     bet.lastMatchedDate + ',' + matchedDateSeconds + ',' + backPriceRequested + ',' + layPriceRequested
     + ',' + bet.priceMatched  + ',' + back + ',' + lay + ',' + bet.profit + ',' + bet.side;
-    dumpToFile('data/2016-9-1','bets-' + bet.marketId + '-' + bet.selectionId + '.csv', message);
+    utils.writeToFile('bets-' + bet.marketId + '-' + bet.selectionId + '.csv', message);
   });
-  dumpToFile('data/2016-9-1','processed.txt',processed);
+  utils.writeToFile('processed.txt',processed);
 }
 
 var runnerArray = [];
@@ -108,7 +98,7 @@ function readBookTxt(marketId) {
 
   //console.log(marketId);
   console.log('Processing ' + marketId);
-  var lr = new reader(config.betfair.data_dir + '/data/' + '2016-9-1'+ '/book-' + marketId  + '.txt');
+  var lr = new reader(root + 'book-' + marketId  + '.txt');
 
   lr.on('error', function (err) {
     console.log('Unable to find ' + marketId);
@@ -124,7 +114,7 @@ function readBookTxt(marketId) {
     //console.log(runners);
     runners.slice().forEach(function(runner) {
       var message = matchedDateSeconds + ',' + runner.lastPriceTraded;
-      dumpToFile('data/2016-9-1','prices-' + marketId + '-' + runner.selectionId + '.csv',message);
+      utils.writeToFile('prices-' + marketId + '-' + runner.selectionId + '.csv',message);
     });
   });
 
