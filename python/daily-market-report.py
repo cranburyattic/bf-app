@@ -12,7 +12,7 @@ with open('../config/betfair_config.yml', 'r') as f:
     doc = yaml.load(f)
     data_dir = doc['default']['betfair']['data_dir']
 
-todays_date = strftime('%Y-%-m-%d', gmtime())
+todays_date = strftime('%Y-%-m-%-d', gmtime())
 
 env = Environment(loader=FileSystemLoader('.'))
 template = env.get_template('report.html')
