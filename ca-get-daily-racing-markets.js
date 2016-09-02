@@ -10,7 +10,6 @@ var moment = require('moment');
 var yaml_config = require('node-yaml-config');
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
 
-
 // handle CTRL-C if want to quit application
 // This will force a logoff
 process.on('SIGINT', function() {
@@ -77,7 +76,6 @@ function log(data) {
     // increment or initialize to 1
     return countMap
   },{});
-
 
   var a = Object.keys(newVals);
   a.forEach(outputScatterData);

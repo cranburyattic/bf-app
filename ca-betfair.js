@@ -182,6 +182,11 @@ exports.getUnderOver25 = function(callback) {
   executeBetfair(postdata,callback);
 }
 
+exports.getDailyBets = function(callback) {
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listClearedOrders", "params": {"betStatus":"SETTLED","settledDateRange":{"from":"2016-09-01T01:00:00Z","to":"2016-09-01T23:00:00Z"}}, "id": 1}]';
+  executeBetfair(postdata,callback);
+}
+
 function getStartDate() {
   var d = new Date();
   d.setHours(1,0,0,0);

@@ -1,73 +1,60 @@
 var fs = require('fs');
-var betfair = require('./ca_betfair.js');
+var betfair = require('./ca-betfair.js');
 var utils = require('./ca-utils.js');
 var csv = require('fast-csv')
 var yaml_config = require('node-yaml-config');
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
 var moment = require('moment');
 var reader = require('line-by-line');
+var processRunners = require('./ca-process-runners.js');
 
 
 function runApplication() {
   readBookTxt();
 }
 
-var iter = 0;
-var openingOdds = new Map();
+var runnerArray = [];
 
 function readBookTxt() {
-  var lr = new reader(config.betfair.data_dir + '/data/' + '2016-7-24'+ '/book-1.125765861.csv');
+  var lr = new reader(config.betfair.data_dir + '/data/' + '2016-9-1'+ '/book-1.126554080.txt');
 
-lr.on('error', function (err) {
-	// 'err' contains error object
-});
+  lr.on('error', function (err) {
+    // 'err' contains error object
+  });
 
-lr.on('line', function (line) {
-  var result = JSON.parse(line);
-  //console.log(result);
-  var runners = result[0].result[0].runners;
-  runners.forEach(function(runner) {
+  lr.on('line', function (line) {
 
-      console.log(runner);
-      var backTotal =  runner.ex.availableToBack.slice(0,3).reduce(function(count, item) {
-        count = count + item.size;
-        // increment or initialize to 1
-        return count;
-      },0);
-      var layTotal =  runner.ex.availableToLay.slice(0,3).reduce(function(count, item) {
-        count = count + item.size;
-        // increment or initialize to 1
-        return count;
-      },0);
-      // this needs to run write each runner out into a separate file - and then graphed - but should only be interested in top 3 horses
-      //if(runner.selectionId == 11412658) {
-        //iter++;
-        //if(iter % 3 == 0) {
-          if(!openingOdds.has(runner.selectionId)) {
-            console.log(runner.selectionId);
-            openingOdds.set(runner.selectionId,runner.lastPriceTraded.toFixed(2));
-            console.log(openingOdds.keys());
-          }
+    var data = JSON.parse(line);
+    var runners = data[0].result[0].runners;
+    console.log(data[0].result[0].lastMatchTime);
+    var matchedDateSeconds = moment(data[0].result[0].lastMatchTime).unix();
+    //console.log(runners);
+    runners.slice().forEach(function(runner) {
 
-          utils.writeToFile('book-1.125765861-' + runner.selectionId + '.csv', runner.lastPriceTraded.toFixed(2) + ',' + runner.totalMatched.toFixed(2) + ',' + backTotal.toFixed(2) + ',' + layTotal.toFixed(2));
 
-          //console.log(/*runner.selectionId + ',' + */runner.lastPriceTraded.toFixed(2) + ',' + runner.totalMatched.toFixed(2) + ',' + backTotal.toFixed(2) + ',' + layTotal.toFixed(2));
+      var message = matchedDateSeconds + ',' + runner.lastPriceTraded;
+      dumpToFile('data/2016-9-1','prices-1.126554080-' + runner.selectionId + '.csv',message);
+    });
+    //  lastPriceTraded
+    //r//unnerArray = processRunners(JSON.parse(line));
 
-        //}
 
-      //}
+    // ...and continue emitting lines.
+  });
 
-  })
-});
+  lr.on('end', function () {
 
-lr.on('end', function () {
-  console.log(openingOdds.keys());
-});
+  });
 }
 
-function generateDirectoryName() {
-  var date = new Date();
-  return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
+function dumpToFile(dir, filename, data) {
+
+var rootDir = config.betfair.data_dir + '/' + dir;
+
+if (!fs.existsSync(rootDir)) {
+fs.mkdirSync(rootDir);
+}
+fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
 }
 
-runApplication()
+runApplication();

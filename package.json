@@ -14,6 +14,16 @@
     "line-by-line": "^0.1.5",
     "moment": "^2.14.1",
     "node-schedule": "^1.1.1",
-    "node-yaml-config": "0.0.4"
+    "node-yaml-config": "0.0.4",
+    "react": "^0.14.8",
+    "react-dom": "^0.14.8",
+    "react-socket": "^0.1.4",
+    "react-websocket": "^1.1.5",
+    "socket.io": "^1.4.8",
+    "ws": "^1.1.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-jslint": "^1.0.4"
   }
 }
