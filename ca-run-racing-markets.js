@@ -8,6 +8,9 @@ var moment = require('moment');
 var processRunners = require('./ca-process-runners.js');
 var server = require('http').createServer();
 
+var timetostart = 8;
+var timeout = 1000;
+
 // web socket section
 var WebSocketServer = require('ws').Server
 , wsrace1 = new WebSocketServer({ server , path: '/ws/race1' })
@@ -72,7 +75,11 @@ function removeWebsocketIndex(state, marketId) {
     },
     runners: []
   }
-  websockets.forEach(socket => socket.send(JSON.stringify(output))) ;
+  websockets.forEach(socket => {
+    if(socket.readyState === 1) {
+      socket.send(JSON.stringify(output))
+    }
+  });
   return state;
 }
 
@@ -128,7 +135,7 @@ function quit() {
 
 
 function setUpTimeouts() {
-  utils.writeToFileAddDay('matched.csv','course,marketName,distance,runners,marketId,startTime,totalMatched');
+  utils.writeToFileAddDay('matched.csv','course,marketName,distance,runners,marketId,startTime,totalMatched',false);
   var csvStream = csv
   .parse({headers : true})
   .on("data", function(data) {
@@ -162,7 +169,6 @@ function handleData(data)   {
       clearTimeout(marketTimers[marketId]);
       delete marketStartTimes[marketId];
       setTimeout(() => { websocketsIndex = removeWebsocketIndex(websocketsIndex, marketId) },1500);
-      console.log('MARKETSLEFT ' + marketStartTimes);
       if(Object.keys(marketStartTimes).length === 0) {
         console.log('No markets left - Logging off');
         logout();
@@ -180,7 +186,7 @@ function emitDataToApp(data) {
   if(marketStartTimes[marketId]) {
     timeRemaining = (marketStartTimes[marketId].valueOf() - moment().valueOf());
     if(timeRemaining > 0) {
-      timeRemaining = timeRemaining / 360000 * 100
+      timeRemaining = timeRemaining / timetostart * 60 * 1000 * 100
     } else if(timeRemaining < 0){
       timeRemaining = 100;
     }
@@ -211,13 +217,13 @@ function emitDataToApp(data) {
 
   function setMarketTimeout(data) {
     console.log('Register ' +  data.marketId + ' - ' + data.course  + ' - ' + data.marketName + ' - ' + moment(data.marketStartTime).format('HH:mm'));
-    var startTime = moment(data.marketStartTime).subtract(6,'minutes');
+    var startTime = moment(data.marketStartTime).subtract(timetostart,'minutes');
     var length = startTime.diff(moment());
     setTimeout(function(){ setMarketInterval(data.marketId) },length);
   }
 
   function setMarketInterval(marketId) {
     console.log('Active ' + marketId + " - " + marketStartTimes[marketId].format());
-    var timer = setInterval( function(){ processMarket(marketId)},500);
+    var timer = setInterval( function(){ processMarket(marketId)},timeout);
     marketTimers[marketId] = timer;
   }

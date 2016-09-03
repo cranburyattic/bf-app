@@ -6,14 +6,20 @@ var yaml_config = require('node-yaml-config');
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
 var moment = require('moment');
 
-function dumpToFile(dir, filename, data) {
+function dumpToFile(dir, filename, data, appendIfFileExists) {
 
     var rootDir = config.betfair.data_dir + '/' + dir;
 
     if (!fs.existsSync(rootDir)) {
         fs.mkdirSync(rootDir);
     }
-    fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
+    if(appendIfFileExists) {
+      fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
+    } else {
+      if(!fileExists(rootDir + '/' +  filename)) {
+          fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
+      }
+    }
 }
 
 exports.generateDirectoryName = function() {
@@ -21,19 +27,31 @@ exports.generateDirectoryName = function() {
     return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
 }
 
-function generateDirectoryNameAddOne() {
+exports.generateDirectoryNameAddOne = function() {
     var now = moment(), tomorrow = now.add(1, 'd');
     return tomorrow.year() + '-' + (tomorrow.month() + 1)  + '-' + (tomorrow.date()); //date.getDate();
 }
 
 exports.writeToFile = function (filename, data) {
-    dumpToFile('data/' + this.generateDirectoryName(), filename, data);
+    dumpToFile('data/' + this.generateDirectoryName(), filename, data, true);
 }
 
 exports.writeToFileAddDay = function (filename, data) {
-    dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data);
+    dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data, true);
+}
+
+exports.writeToFileAddDay = function (filename, data, appendIfFileExists) {
+    dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data, appendIfFileExists);
 }
 
 exports.writeToFileJson = function (filename, data) {
-    dumpToFile('data/' + this.generateDirectoryName(), filename, JSON.stringify(data));
+    dumpToFile('data/' + this.generateDirectoryName(), filename, JSON.stringify(data), true);
+}
+
+function fileExists(filePath) {
+    try {
+        return fs.statSync(filePath).isFile();
+    } catch (err) {
+        return false;
+    }
 }
