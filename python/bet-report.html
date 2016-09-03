@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+
+h2 {
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+table {
+  font-family: Verdana, Geneva, sans-serif;
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+    background-color: #7c7eea;
+    color: white;
+}
+</style>
+</head>
+<body>
+    <h2>{{ title }}</h2>
+    <h2>Profit/Loss</h2>
+     {{ profit_loss }}
+
+     {{ profit_loss_summary }}
+
+     <img src="profit-loss.png"/>
+     <h2>Prices/Bets Placed</h2>
+     {{ images}}
+</body>
+</html>

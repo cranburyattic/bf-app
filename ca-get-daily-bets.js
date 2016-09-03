@@ -36,18 +36,20 @@ function logout() {
 }
 
 var root = config.betfair.data_dir + '/data/' + utils.generateDirectoryName() + '/';
+
+var runnerNames = {};
 // GET TODAY'S races
 function getTodaysBets() {
 
   var content = fs.readFileSync(root + 'events.json');
   var data = JSON.parse(content);
   var marketDetails = JSON.stringify(data[0].result[0])
-
+  utils.writeToFileWithSubDir('charts','temp.txt','Charts');
   data[0].result.forEach(item => {
     item.runners.forEach(runner => {
+      runnerNames[runner.selectionId] = runner.runnerName;
       var message = item.event.venue + ' - ' + item.marketStartTime.substring(11,16) + ' - ' + runner.runnerName;
-      //console.log(message);
-      utils.writeToFile('info-' + item.marketId + '-' + runner.selectionId + '.csv',message);
+      utils.writeToFileWithSubDir('info','info-' + item.marketId + '-' + runner.selectionId + '.csv',message);
     });
   });
 
@@ -57,6 +59,8 @@ function getTodaysBets() {
 
 function handleResult(data) {
   var processed = [];
+  var headerAllBets = 'selectionId,horseName,profit';
+  utils.writeToFile('all-bets.csv', headerAllBets);
 
   data[0].result.clearedOrders.map(bet => {
     var placedDateSeconds = moment(bet.placedDate).unix();
@@ -79,15 +83,18 @@ function handleResult(data) {
     //console.log(processed);
     //console.log(processed.indexOf(key));
     if(processed.indexOf(key) == -1 ) {
-      utils.writeToFile('bets-' + bet.marketId + '-' + bet.selectionId + '.csv', header);
+      utils.writeToFileWithSubDir('bets','bets-' + bet.marketId + '-' + bet.selectionId + '.csv', header);
       readBookTxt(bet.marketId);
       processed.push(key);
     }
 
+    var messageAllBets = bet.selectionId + ',' + runnerNames[bet.selectionId] + ',' + bet.profit;
+    utils.writeToFile('all-bets.csv', messageAllBets);
+
     var message = bet.marketId + ',' + bet.selectionId + ',' +  bet.placedDate + ',' + placedDateSeconds + ',' +
     bet.lastMatchedDate + ',' + matchedDateSeconds + ',' + backPriceRequested + ',' + layPriceRequested
     + ',' + bet.priceMatched  + ',' + back + ',' + lay + ',' + bet.profit + ',' + bet.side;
-    utils.writeToFile('bets-' + bet.marketId + '-' + bet.selectionId + '.csv', message);
+    utils.writeToFileWithSubDir('bets','bets-' + bet.marketId + '-' + bet.selectionId + '.csv', message);
   });
   utils.writeToFile('processed.txt',processed);
 }
@@ -114,7 +121,7 @@ function readBookTxt(marketId) {
     //console.log(runners);
     runners.slice().forEach(function(runner) {
       var message = matchedDateSeconds + ',' + runner.lastPriceTraded;
-      utils.writeToFile('prices-' + marketId + '-' + runner.selectionId + '.csv',message);
+      utils.writeToFileWithSubDir('prices','prices-' + marketId + '-' + runner.selectionId + '.csv',message);
     });
   });
 

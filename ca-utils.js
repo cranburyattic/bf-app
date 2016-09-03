@@ -36,6 +36,10 @@ exports.writeToFile = function (filename, data) {
     dumpToFile('data/' + this.generateDirectoryName(), filename, data, true);
 }
 
+exports.writeToFileWithSubDir = function (subDir,filename, data) {
+    dumpToFile('data/' + this.generateDirectoryName() + '/' + subDir, filename, data, true);
+}
+
 exports.writeToFileAddDay = function (filename, data) {
     dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data, true);
 }

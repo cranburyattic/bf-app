@@ -26,9 +26,9 @@ f.close()
 
 for file in files:
     dateparse = lambda x: dt.strptime(x, '%Y-%m-%dT%H:%M:%S.%fZ')
-    file_bets = data_dir + '/data/' + todays_date + '/bets-' + file + '.csv'
-    file_markets = data_dir + '/data/' + todays_date + '/prices-' + file + '.csv'
-    file_info = data_dir + '/data/' + todays_date + '/info-' + file + '.csv'
+    file_bets = data_dir + '/data/' + todays_date + '/bets/bets-' + file + '.csv'
+    file_markets = data_dir + '/data/' + todays_date + '/prices/prices-' + file + '.csv'
+    file_info = data_dir + '/data/' + todays_date + '/info/info-' + file + '.csv'
     markets = pd.read_csv(file_bets)
     prices = pd.read_csv(file_markets,header=None)
 
@@ -49,5 +49,5 @@ for file in files:
     ax2.scatter(markets['matchedDateSeconds'], markets['back'], s=50, c='y', alpha=0.5 )
     ax2.scatter(markets['matchedDateSeconds'], markets['lay'], s=50, c='y', alpha=0.5 )
 
-    fig.savefig(data_dir + '/data/' + todays_date + '/chart-' + file + '.png', dpi=100)
+    fig.savefig(data_dir + '/data/' + todays_date + '/charts/chart-' + file + '.png', dpi=100)
     plt.close()
