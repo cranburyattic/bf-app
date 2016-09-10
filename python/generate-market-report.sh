@@ -1,6 +1,5 @@
 #! /bin/bash
 
-/usr/local/bin/python3 generate-charts-for-days-racing.py
-/usr/local/bin/python3 daily-bet-report.py > /tmp/out-bet-temp.html
-/usr/local/bin/wkhtmltopdf /tmp/out-bet-temp.html /tmp/bet-report.pdf
-/usr/local/bin/python3 copy-bet-report.py
+/usr/local/bin/python3 daily-market-report.py > /tmp/out-temp.html
+/usr/local/bin/wkhtmltopdf /tmp/out-temp.html /tmp/market-report.pdf
+/usr/local/bin/python3 copy-market-report.py
