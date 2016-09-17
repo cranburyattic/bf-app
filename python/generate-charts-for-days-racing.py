@@ -49,5 +49,5 @@ for file in files:
     ax2.scatter(markets['matchedDateSeconds'], markets['back'], s=50, c='y', alpha=0.5 )
     ax2.scatter(markets['matchedDateSeconds'], markets['lay'], s=50, c='y', alpha=0.5 )
 
-    fig.savefig(data_dir + '/data/' + todays_date + '/charts/chart-' + file + '.png', dpi=100)
+    fig.savefig(data_dir + '/data/' + todays_date + '/charts/chart-' + file + '.png', dpi=80)
     plt.close()

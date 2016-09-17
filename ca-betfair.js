@@ -154,10 +154,25 @@ exports.getTodaysRaces = function(callback) {
   executeBetfair(postdata,callback);
 }
 
+exports.getEventData = function(marketIds, callback) {
+
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listEvents", "params": {"filter":{"marketIds":[' + marketIds + ']}}, "id": 1}]]';
+
+  executeBetfair(postdata,callback);
+}
+
+
 exports.getRacingMarketsForEvents = function(eventIds, callback) {
 
   var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventIds":[' + eventIds + '],"marketTypeCodes":["WIN"]},"sort":"FIRST_TO_START","maxResults":"1000","marketProjection":["MARKET_START_TIME","EVENT","COMPETITION","RUNNER_METADATA"]}, "id": 1}]';
 
+  executeBetfair(postdata,callback);
+}
+
+exports.getMarketsForEvents = function(marketIds, callback) {
+
+  var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"marketIds":[' + marketIds + ']},"sort":"FIRST_TO_START","maxResults":"100","marketProjection":["MARKET_START_TIME","RUNNER_METADATA","EVENT"]}, "id": 1}]';
+  //var postdata = '[{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"marketIds":["1.126644780"]},"sort":"FIRST_TO_START","maxResults":"1","marketProjection":["MARKET_START_TIME","RUNNER_METADATA","EVENT"]}, "id": 1}]';
   executeBetfair(postdata,callback);
 }
 

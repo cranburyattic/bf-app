@@ -36,7 +36,8 @@ exports.writeToFile = function (filename, data) {
     dumpToFile('data/' + this.generateDirectoryName(), filename, data, true);
 }
 
-exports.writeToFileWithSubDir = function (subDir,filename, data) {
+exports.writeToFileWithSubDir = function(subDir,filename, data) {
+
     dumpToFile('data/' + this.generateDirectoryName() + '/' + subDir, filename, data, true);
 }
 
@@ -46,6 +47,10 @@ exports.writeToFileAddDay = function (filename, data) {
 
 exports.writeToFileAddDay = function (filename, data, appendIfFileExists) {
     dumpToFile('data/' + this.generateDirectoryNameAddOne(), filename, data, appendIfFileExists);
+}
+
+exports.writeToFileWithSubDirWithAppend = function (subDir, filename, data, appendIfFileExists) {
+    dumpToFile('data/' + this.generateDirectoryName() + '/' + subDir, filename, data, appendIfFileExists);
 }
 
 exports.writeToFileJson = function (filename, data) {

@@ -35,7 +35,8 @@ images = ''
 for file in files:
     profitLoss = df_bets_pivot_selection.get_value(int(file.split('-')[1]),'profit')
     images += '<img src="' + data_dir + '/data/' + todays_date + '/charts/chart-' + file+ '.png"/>'
-    images +='<div><h2>Profit/Loss = ' + str(profitLoss) + '<h2></div>'
+    images += '<img src="' + data_dir + '/data/' + todays_date + '/charts/insights-chart-' + file+ '.png"/>'
+    images +='<div><h3>Profit/Loss = ' + str(profitLoss) + '<h3></div>'
 
 template_vars = {'title' : 'Bets Report - ' + strftime('%Y-%m-%d %H:%M:%S', localtime()),
                   'profit_loss': df_bets_pivot_total.to_html(),

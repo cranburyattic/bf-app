@@ -12,6 +12,8 @@
     "asynch": "^0.5.2",
     "fast-csv": "^2.1.0",
     "line-by-line": "^0.1.5",
+    "lodash": "^4.15.0",
+    "mathjs": "^3.5.0",
     "moment": "^2.14.1",
     "node-schedule": "^1.1.1",
     "node-yaml-config": "0.0.4",
@@ -19,6 +21,7 @@
     "react-dom": "^0.14.8",
     "react-socket": "^0.1.4",
     "react-websocket": "^1.1.5",
+    "redux": "^3.6.0",
     "socket.io": "^1.4.8",
     "ws": "^1.1.1"
   },

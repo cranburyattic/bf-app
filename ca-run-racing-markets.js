@@ -5,11 +5,13 @@ var csv = require('fast-csv')
 var yaml_config = require('node-yaml-config');
 var config = yaml_config.load(__dirname + '/config/betfair_config.yml');
 var moment = require('moment');
-var processRunners = require('./ca-process-runners.js');
+var processRunners = require('./modules/ca-process-runners.js');
+var eventInformation = require('./modules/ca-event-information.js');
+var store = require('./modules/ca-store.js');
+
 var server = require('http').createServer();
 
-var timetostart = 8;
-var timeout = 1000;
+var appstore =  store();
 
 // web socket section
 var WebSocketServer = require('ws').Server
@@ -21,45 +23,47 @@ var websockets = [];
 
 server.listen(8081, () => runApplication());
 
+server.on('request', function(request, response) {
+  response.end(JSON.stringify(_getState()));
+});
+
+
 wsrace1.on('connection', function connection(ws) {
   console.log("Connection to wsrace1");
   websockets[0] = ws;
+  ws.addEventListener("close", function(event) {
+    websocketMap = {}
+  });
+  logData = true;
 });
 
 wsrace2.on('connection', function connection(ws) {
   console.log("Connection to wsrace2");
   websockets[1] = ws;
+  ws.addEventListener("close", function(event) {
+    websocketMap = {}
+  });
+  logData = true;
 });
 
-wsrace3.on('connection', function connection(ws) {
-  console.log("Connection to wsrace3");
-  websockets[2] = ws;
-});
+var websocketMap = {};
 
 function emitData(data) {
-  var index = getWebsocketIndex(websocketsIndex,data.race.id)
-  if(websockets[index]  !== undefined) {
-    if(websockets[index].readyState === 1) {
-      websockets[index].send(JSON.stringify(data));
+  var websocket = websocketMap[data.race.id];
+  if(websocket === undefined && websockets.length > 0) {
+    websocket = websockets.shift();
+    websocketMap[data.race.id] = websocket;
+  }
+
+  if(websocket != undefined) {
+    if(websocket.readyState === 1) {
+      websocket.send(JSON.stringify(data));
     }
   }
 }
 
-var websocketsIndex = [];
+function emitClose(marketId) {
 
-function getWebsocketIndex(state,marketId) {
-  if(state.indexOf(marketId) === -1) {
-    state.push(marketId);
-  }
-  return state.indexOf(marketId);
-}
-
-function removeWebsocketIndex(state, marketId) {
-
-  var index = state.indexOf(marketId);
-  if(index !== -1) {
-    state = state.splice(index, index);
-  }
   var output =
   { race:
     {
@@ -75,47 +79,34 @@ function removeWebsocketIndex(state, marketId) {
     },
     runners: []
   }
-  websockets.forEach(socket => {
-    if(socket.readyState === 1) {
-      socket.send(JSON.stringify(output))
+
+  var websocket = websocketMap[marketId];
+
+  if(websocket != undefined) {
+    if(websocket.readyState === 1) {
+      websocket.send(JSON.stringify(output));
     }
-  });
-  return state;
+    websockets.push(websocket);
+    delete websocketMap[marketId];
+  }
 }
 
-// web socket sections
-
-// lookup data
-
-var runnerNames = {};
-var marketNames = {};
-
-var content = fs.readFileSync(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/events.json');
-var data = JSON.parse(content);
-var marketDetails = JSON.stringify(data[0].result[0])
-
-data[0].result.forEach(item => {
-  var details = {};
-  details.marketId = item.marketId;
-  details.venue = item.event.venue;
-  details.marketName = item.marketName;
-  details.startTime = item.marketStartTime;
-  marketNames[item.marketId] = details;
-  item.runners.forEach(runner => {
-    runnerNames[runner.selectionId] = runner.runnerName;
-  });
-});
-
-// lookup data
+function setupEventData() {
+  //var content = fs.readFileSync(config.betfair.data_dir + '/data/2016-9-4/events.json');
+  var content = fs.readFileSync(config.betfair.data_dir + '/data/' + _generateDirectoryName() + '/events.json');
+  eventInformation(appstore, JSON.parse(content));
+  //console.log(appstore.getState());
+}
 
 var marketTimers = {} ;
 var marketStartTimes = {};
 var marketData = {};
 
-var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + generateDirectoryName() + '/markets.csv');
+var stream = fs.createReadStream(config.betfair.data_dir + '/data/' + _generateDirectoryName() + '/markets.csv');
+//var stream = fs.createReadStream(config.betfair.data_dir + '/data/2016-9-4/markets.csv');
 
 function runApplication() {
-  console.log('Running ' + new Date());
+  setupEventData();
   betfair.login(setUpTimeouts);
 }
 // handle CTRL-C if want to quit application
@@ -139,16 +130,29 @@ function setUpTimeouts() {
   var csvStream = csv
   .parse({headers : true})
   .on("data", function(data) {
-    //var startTime = moment(data.marketStartTime).subtract(6,'minutes');
     if(moment().isBefore(moment(data.marketStartTime))) {
-      marketStartTimes[data.marketId] = moment(data.marketStartTime);
+
+      appstore.dispatch({
+        type: 'ADD_MARKET_STARTTIME',
+        id : data.marketId,
+        value : moment(data.marketStartTime)
+      })
+
       var marketInfo = data.course  + ',' + data.marketName + ',' + data.distance + ',' + data.runners;
-      marketData[data.marketId] = marketInfo;
-      setMarketTimeout(data);
+
+      appstore.dispatch({
+        type: 'ADD_MARKET_CSV',
+        id : data.marketId,
+        value : marketInfo
+      })
+
+      _setMarketTimeout(data);
     }
   })
   .on("end", function(){
     console.log("Timeouts setup");
+    console.log(_getState());
+
   });
   stream.pipe(csvStream);
 }
@@ -158,18 +162,34 @@ function processMarket(market) {
 }
 
 function handleData(data)   {
+
   if(data[0].result[0] != null) {
+
     var marketId = data[0].result[0].marketId;
     var status = data[0].result[0].status;
-    utils.writeToFileJson('book-' + marketId + '.txt',data);
-    if(moment().isAfter(marketStartTimes[marketId])) {
-      var message = marketData[marketId] + ',' + marketId + ',' + moment(marketStartTimes[marketId]).format() + ',' + data[0].result[0].totalMatched;
+
+    if(_getState().settings.logData) {
+      utils.writeToFileJsonOSX('book-' + marketId + '.txt',data);
+    }
+
+    if(moment().isAfter(_getState().runtimeInfo.marketStartTimes[marketId])) {
+
+      var message = _getState().runtimeInfo.marketCSV[marketId] + ',' + marketId + ',' + moment(_getState().runtimeInfo.marketStartTimes[marketId]).format() + ',' + data[0].result[0].totalMatched;
+
       utils.writeToFileAddDay('matched.csv',message);
+
       console.log('Closed ' + marketId)
-      clearTimeout(marketTimers[marketId]);
-      delete marketStartTimes[marketId];
-      setTimeout(() => { websocketsIndex = removeWebsocketIndex(websocketsIndex, marketId) },1500);
-      if(Object.keys(marketStartTimes).length === 0) {
+
+      clearTimeout(_getState().runtimeInfo.marketTimers[marketId]);
+
+      appstore.dispatch({
+        type: 'DELETE_MARKET_STARTTIME',
+        id : marketId,
+      })
+
+      emitClose(marketId);
+
+      if(Object.keys(_getState().runtimeInfo.marketStartTimes).length === 0) {
         console.log('No markets left - Logging off');
         logout();
       }
@@ -183,10 +203,11 @@ function emitDataToApp(data) {
 
   var marketId = data[0].result[0].marketId
   var timeRemaining;
-  if(marketStartTimes[marketId]) {
-    timeRemaining = (marketStartTimes[marketId].valueOf() - moment().valueOf());
+  if(_getState().runtimeInfo.marketStartTimes[marketId]) {
+    timeRemaining = (moment(_getState().runtimeInfo.marketStartTimes[marketId]).valueOf() - moment().valueOf());
+    console.log('t1 ' + timeRemaining)
     if(timeRemaining > 0) {
-      timeRemaining = timeRemaining / timetostart * 60 * 1000 * 100
+      timeRemaining = timeRemaining / (_getState().settings.timeToStart * 60 * 1000) * 100
     } else if(timeRemaining < 0){
       timeRemaining = 100;
     }
@@ -198,32 +219,49 @@ function emitDataToApp(data) {
     race : {
       id : marketId,
       timeRemaining : timeRemaining,
-      course : marketNames[marketId].venue,
+      course : _getState().eventInfo.marketDetails[marketId].venue,
       totalMatched : data[0].result[0].totalMatched,
       totalAvailable : data[0].result[0].totalAvailable,
-      distance : marketNames[marketId].marketName,
-      startTime: moment(marketNames[marketId].startTime).format('HH:mm')
+      distance : _getState().eventInfo.marketDetails[marketId].marketName,
+      startTime: moment(_getState().eventInfo.marketDetails[marketId].startTime).format('HH:mm')
     }};
-
-    var runners  = processRunners(runnerNames,data);
-    output.runners = runners;
+    // set up the runners
+    output.runners = processRunners(_getState().eventInfo.runnerNames,data).slice(0,5);
+    // send the data
+    //console.log(output);
     emitData(output);
-  }
+}
 
-  function generateDirectoryName() {
-    var date = new Date();
-    return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
-  }
+function _getState() {
+  return appstore.getState();
+}
 
-  function setMarketTimeout(data) {
-    console.log('Register ' +  data.marketId + ' - ' + data.course  + ' - ' + data.marketName + ' - ' + moment(data.marketStartTime).format('HH:mm'));
-    var startTime = moment(data.marketStartTime).subtract(timetostart,'minutes');
-    var length = startTime.diff(moment());
-    setTimeout(function(){ setMarketInterval(data.marketId) },length);
-  }
+function _generateDirectoryName() {
+  return utils.generateDirectoryName();
+}
 
-  function setMarketInterval(marketId) {
-    console.log('Active ' + marketId + " - " + marketStartTimes[marketId].format());
-    var timer = setInterval( function(){ processMarket(marketId)},timeout);
-    marketTimers[marketId] = timer;
-  }
+function _setMarketTimeout(data) {
+  console.log('Register ' +  data.marketId + ' - ' + data.course  + ' - ' + data.marketName + ' - ' + moment(data.marketStartTime).format('HH:mm'));
+
+  var startTime = moment(data.marketStartTime).subtract(_getState().settings.timeToStart,'minutes');
+  var length = startTime.diff(moment());
+
+  setTimeout(function(){ _setMarketInterval(data.marketId) },length);
+}
+
+function _setMarketInterval(marketId) {
+
+  console.log('Active ' + marketId + " - " + (_getState().runtimeInfo.marketStartTimes[marketId] ? _getState().runtimeInfo.marketStartTimes[marketId].format() : 'NOW'));
+
+  console.log(_getState().settings.timeout);
+  var timer = setInterval( function() { processMarket(marketId) },_getState().settings.timeout);
+
+  appstore.dispatch({
+    type: 'ADD_MARKET_TIMER',
+    id : marketId,
+    value : timer
+  })
+
+  console.log(_getState());
+  marketTimers[marketId] = timer;
+}
