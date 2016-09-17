@@ -22,6 +22,22 @@ function dumpToFile(dir, filename, data, appendIfFileExists) {
     }
 }
 
+function dumpFileToOSX(dir, filename, data, appendIfFileExists) {
+
+    var rootDir = config.betfair.osx_data_dir + '/' + dir;
+
+    if (!fs.existsSync(rootDir)) {
+        fs.mkdirSync(rootDir);
+    }
+    if(appendIfFileExists) {
+      fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
+    } else {
+      if(!fileExists(rootDir + '/' +  filename)) {
+          fs.appendFileSync(rootDir + '/' +  filename, data + '\n');
+      }
+    }
+}
+
 exports.generateDirectoryName = function() {
     var date = new Date();
     return date.getFullYear() + '-' + (date.getMonth() + 1)  + '-' + date.getDate();
@@ -56,6 +72,11 @@ exports.writeToFileWithSubDirWithAppend = function (subDir, filename, data, appe
 exports.writeToFileJson = function (filename, data) {
     dumpToFile('data/' + this.generateDirectoryName(), filename, JSON.stringify(data), true);
 }
+
+exports.writeToFileJsonOSX = function (filename, data) {
+    dumpFileToOSX('data/' + this.generateDirectoryName(), filename, JSON.stringify(data), true);
+}
+
 
 function fileExists(filePath) {
     try {

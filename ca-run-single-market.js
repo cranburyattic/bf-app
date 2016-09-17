@@ -152,7 +152,7 @@ function emitDataToApp(data) {
       distance : _getState().eventInfo.marketDetails[marketId].marketName,
       startTime: moment(_getState().eventInfo.marketDetails[marketId].startTime).format('HH:mm')
     }};
-    output.runners = processRunners(_getState().eventInfo.runnerNames,data).slice(0,100);
+    output.runners = processRunners(_getState().eventInfo.runnerNames,data).slice(0,100 );
     emitData(output);
   }
 
