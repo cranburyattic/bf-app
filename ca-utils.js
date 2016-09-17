@@ -25,7 +25,6 @@ function dumpToFile(dir, filename, data, appendIfFileExists) {
 function dumpFileToOSX(dir, filename, data, appendIfFileExists) {
 
     var rootDir = config.betfair.osx_data_dir + '/' + dir;
-
     if (!fs.existsSync(rootDir)) {
         fs.mkdirSync(rootDir);
     }

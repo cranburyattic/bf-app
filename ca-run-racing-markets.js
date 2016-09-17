@@ -162,15 +162,14 @@ function processMarket(market) {
 }
 
 function handleData(data)   {
-
   if(data[0].result[0] != null) {
 
     var marketId = data[0].result[0].marketId;
     var status = data[0].result[0].status;
 
-    if(_getState().settings.logData) {
+    //if(_getState().settings.logData) {
       utils.writeToFileJsonOSX('book-' + marketId + '.txt',data);
-    }
+    //}
 
     if(moment().isAfter(_getState().runtimeInfo.marketStartTimes[marketId])) {
 
@@ -205,7 +204,6 @@ function emitDataToApp(data) {
   var timeRemaining;
   if(_getState().runtimeInfo.marketStartTimes[marketId]) {
     timeRemaining = (moment(_getState().runtimeInfo.marketStartTimes[marketId]).valueOf() - moment().valueOf());
-    console.log('t1 ' + timeRemaining)
     if(timeRemaining > 0) {
       timeRemaining = timeRemaining / (_getState().settings.timeToStart * 60 * 1000) * 100
     } else if(timeRemaining < 0){

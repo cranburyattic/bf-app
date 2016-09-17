@@ -36,6 +36,8 @@ function logout() {
 }
 
 var root = config.betfair.data_dir + '/data/' + utils.generateDirectoryName() + '/';
+var osx_root = config.betfair.osx_data_dir + '/data/' + utils.generateDirectoryName() + '/';
+
 
 var runnerNames = {};
 // GET TODAY'S races
@@ -52,8 +54,6 @@ function getTodaysBets() {
       utils.writeToFileWithSubDir('info','info-' + item.marketId + '-' + runner.selectionId + '.csv',message);
     });
   });
-
-  //console.log('marketId,selectionId,placedDate,placedDateSeconds,matchDate,matchedDateSeconds,backPriceRequested,layPriceRequested,priceMatched,back,lay,profit,type');
 	betfair.getDailyBets(handleResult);
 }
 
@@ -65,7 +65,6 @@ function handleResult(data) {
   data[0].result.clearedOrders.map(bet => {
     var placedDateSeconds = moment(bet.placedDate).unix();
     var matchedDateSeconds = moment(bet.lastMatchedDate).unix();
-    //console.log(bet.lastMatchedDate + " " + matchedDateSeconds);
     var lay = '';
     var back = '';
     var backPriceRequested = '';
@@ -80,8 +79,6 @@ function handleResult(data) {
 
     var header = 'marketId,selectionId,placedDate,placedDateSeconds,matchDate,matchedDateSeconds,backPriceRequested,layPriceRequested,priceMatched,back,lay,profit,type';
     var key = bet.marketId + '-' + bet.selectionId;
-    //console.log(processed);
-    //console.log(processed.indexOf(key));
     if(processed.indexOf(key) == -1 ) {
       utils.writeToFileWithSubDir('bets','bets-' + bet.marketId + '-' + bet.selectionId + '.csv', header);
       readBookTxt(bet.marketId);
@@ -105,7 +102,7 @@ function readBookTxt(marketId) {
 
   //console.log(marketId);
   console.log('Processing ' + marketId);
-  var lr = new reader(root + 'book-' + marketId  + '.txt');
+  var lr = new reader(osx_root + 'book-' + marketId  + '.txt');
 
   lr.on('error', function (err) {
     console.log('Unable to find ' + marketId);

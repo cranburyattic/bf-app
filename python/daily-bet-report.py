@@ -19,10 +19,10 @@ template = env.get_template('bet-report.html')
 
 
 bets = pd.read_csv(data_dir + '/data/' + todays_date+ '/all-bets.csv')
+
 df_bets_pivot = pd.pivot_table(bets,index=["horseName"],values=["profit"], aggfunc=np.sum)
 df_bets_pivot_total = pd.pivot_table(bets,index=["horseName"],values=["profit"], aggfunc=np.sum, margins=True)
 df_bets_pivot_selection = pd.pivot_table(bets,index=["selectionId"],values=["profit"], aggfunc=np.sum)
-
 df_bets = df_bets_pivot.plot(kind='bar')
 df_bets.get_figure().savefig('profit-loss.png');
 
