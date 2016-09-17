@@ -23,14 +23,23 @@ matched = pd.read_csv(data_dir + '/data/' + todays_date+ '/matched.csv', dtype={
 under_over_25 = pd.read_csv(data_dir + '/data/' + todays_date+ '/under-over-25.csv')
 
 
-matched_dist_df = matched[['distance','totalMatched']]
-matched_dist = matched_dist_df.plot(x='distance',kind='bar')
+try:
+    matched_dist_df = matched[['distance','totalMatched']]
+    matched_dist = matched_dist_df.plot(x='distance',kind='bar')
 
-matched_df = matched[['course','totalMatched']]
-matched_time_and_value = matched_df.plot(x='course',kind='bar')
+    matched_df = matched[['course','totalMatched']]
+    matched_time_and_value = matched_df.plot(x='course',kind='bar')
 
-matched_runners_df = matched[['runners','totalMatched']]
-matched_runners_and_value = matched_runners_df.plot(x='runners',kind='bar')
+    matched_runners_df = matched[['runners','totalMatched']]
+    matched_runners_and_value = matched_runners_df.plot(x='runners',kind='bar')
+
+    matched_time_and_value.get_figure().savefig('/tmp/matched-bets.png')
+    matched_dist.get_figure().savefig('/tmp/matched-dist-bets.png')
+    matched_runners_and_value.get_figure().savefig('/tmp/matched_runners_and_value.png')
+
+except TypeError:
+        pass
+
 
 distance_and_runners_df = markets[['distance','runners']]
 distance_and_runners = distance_and_runners_df.plot(kind='bar')
@@ -48,9 +57,6 @@ template_vars = {'title' : 'Market Report - ' + strftime('%Y-%m-%d %H:%M:%S', lo
 html_out = template.render(template_vars)
 
 distance_and_runners.get_figure().savefig('/tmp/distance-and-runners.png')
-matched_time_and_value.get_figure().savefig('/tmp/matched-bets.png')
-matched_dist.get_figure().savefig('/tmp/matched-dist-bets.png')
-matched_runners_and_value.get_figure().savefig('/tmp/matched_runners_and_value.png')
 
 fig, ax = plt.subplots()
 
@@ -65,7 +71,6 @@ colors = np.random.rand(20)
 ax.scatter(scatter[0], scatter[1], c=scatter[0] , s=100 * scatter[2], alpha=0.5)
 
 ax.legend(numpoints=1, loc='upper left')
-
 fig.savefig('/tmp/distance-and-runners-scatter.png', dpi=100)
 
 print(html_out)
